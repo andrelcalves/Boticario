@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = "Backend para o controle de vendas do processo seletivo para o Grupo Boticário"
+authors = ["Ueslei Carvalho <uesleicdoliveira@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.70.0"
+sqlmodel = "^0.0.4"
+psycopg2-binary = "^2.9.1"
+Inject = "^4.3.1"
+ujson = "^4.2.0"
+uvicorn = "^0.15.0"
+gunicorn = "^20.1.0"
+emails = "^0.6"
+pytz = "^2021.3"
+pydantic = {version = "^1.8.2", extras = ["dotenv", "email"]}
+python-jose = {version = "^3.3.0", extras = ["cryptography"]}
+passlib = {version = "^1.7.4", extras = ["bcrypt"]}
+alembic = "^1.7.4"
+logzero = "^1.7.0"
+validate-docbr = "^1.10.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+flake8 = "^4.0.1"
+black = "^21.9b0"
+isort = "^5.9.3"
+autoflake8 = "^0.2.2"
+factory-boy = "^3.2.1"
+pre-commit = "^2.15.0"
+pytest-env = "^0.6.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+line_length=120
+profile = "black"
+
+[tool.black]
+line-length=120
+
+[tool.pytest.ini_options]
+env = [
+    "ENVIRONMENT = test"
+    ]
