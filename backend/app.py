@@ -5,7 +5,9 @@ from fastapi.responses import UJSONResponse
 
 from .api import auth, health_check, v1
 from .core.config import settings
+from .core.helpers.database import init_database
 from .core.helpers.exceptions import DatabaseError, NotAuthorizedError, NotFoundError
+from .core.helpers.logger import logger
 
 app = FastAPI(
     tilte="Grupo Boticário - Backend",
@@ -17,9 +19,9 @@ app = FastAPI(
     default_response_class=UJSONResponse,
 )
 
-app.include_router(v1.endpoints, prefix="/v1")
-app.include_router(auth.router, prefix="/auth")
-app.include_router(health_check.router, prefix="/healh-check")
+app.include_router(v1.endpoints, prefix="/v1", tags=["v1"])
+app.include_router(auth.router, prefix="/auth", tags=["Authorization"])
+app.include_router(health_check.router, prefix="/health-check")
 
 
 @app.exception_handler(RequestValidationError)
@@ -44,12 +46,23 @@ async def not_found_error(request: Request, exc: NotFoundError):
 
 @app.exception_handler(NotAuthorizedError)
 async def not_authorized_error(request: Request, exc: NotAuthorizedError):
-    return UJSONResponse(content={"message": exc.detail}, status_code=status.HTTP_401_UNAUTHORIZED)
+    return UJSONResponse(
+        content={"message": exc.detail},
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 @app.exception_handler(Exception)
 async def unknown_error(request: Request, exc: Exception):
     return UJSONResponse(content={"message": str(exc)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@app.on_event("startup")
+async def start_application():
+    logger.info("Starting database..")
+    init_database()
+    logger.info("Database started..")
 
 
 if __name__ == "__main__":

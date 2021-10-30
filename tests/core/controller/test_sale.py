@@ -15,10 +15,10 @@ from tests.factories.seller import CreateSellerFactory
 def test_create_sale_success(session: Session):
     # Prepare
     seller = controller.seller.create(session, schema=CreateSellerFactory())
-    schema = CreateSaleFactory(seller_cpf=seller.cpf)
+    schema = CreateSaleFactory()
 
     # Create
-    sale = controller.sale.create(session, schema)
+    sale = controller.sale.create(session, schema, seller)
 
     # Assert
     assert sale.seller_cpf == seller.cpf
@@ -26,16 +26,16 @@ def test_create_sale_success(session: Session):
     assert sale.date is not schema.date
     assert sale.item_code == schema.item_code
     assert sale.status == SaleStatusEnum.PENDING
-    assert sale.cashback_percentual is not None
+    assert sale.cashback_value is not None
     assert sale.cashback_percentual is not None
 
 
 def test_create_sale_auto_aprove_success(session: Session, seller_to_auto_aprove_sales: Seller):
     # Prepare
-    schema = CreateSaleFactory(seller_cpf=seller_to_auto_aprove_sales.cpf)
+    schema = CreateSaleFactory()
 
     # Create
-    sale = controller.sale.create(session, schema)
+    sale = controller.sale.create(session, schema, seller_to_auto_aprove_sales)
 
     # Assert
     assert sale.status == SaleStatusEnum.APROVED
@@ -53,7 +53,7 @@ def test_get_all_success(session: Session):
 
     # Create
     for schema in sales_schema:
-        controller.sale.create(session, schema)
+        controller.sale.create(session, schema, seller)
 
     sales = controller.sale.get_all(session, GetAllSales(seller_cpf=seller.cpf, month=today.month, year=today.year))
 
@@ -70,10 +70,10 @@ def test_get_all_success(session: Session):
 def test_delete_success(session: Session):
     # Prepare
     seller = controller.seller.create(session, schema=CreateSellerFactory())
-    sale = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf))
+    sale = controller.sale.create(session, CreateSaleFactory(), seller)
 
     # Delete
-    deleted_sale = controller.sale.delete_sale_by_id(session, sale.id)
+    deleted_sale = controller.sale.delete_by_id(session, sale.id)
 
     # Assert
     assert deleted_sale is not None
@@ -94,9 +94,9 @@ def test_sale_cashback(session: Session):
     seller = controller.seller.create(session, schema=CreateSellerFactory())
 
     # Create
-    sale_range1 = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf, value=1))
-    sale_range2 = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf, value=1000))
-    sale_range3 = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf, value=1500))
+    sale_range1 = controller.sale.create(session, CreateSaleFactory(value=1), seller)
+    sale_range2 = controller.sale.create(session, CreateSaleFactory(value=1000), seller)
+    sale_range3 = controller.sale.create(session, CreateSaleFactory(value=1500), seller)
 
     # Assert
 
@@ -108,8 +108,8 @@ def test_sale_cashback(session: Session):
 def test_update_sale_status_success(session: Session):
     # Prepare
     seller = controller.seller.create(session, schema=CreateSellerFactory())
-    sale = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf, status=SaleStatusEnum.PENDING))
-    sale2 = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf, status=SaleStatusEnum.PENDING))
+    sale = controller.sale.create(session, CreateSaleFactory(status=SaleStatusEnum.PENDING), seller)
+    sale2 = controller.sale.create(session, CreateSaleFactory(status=SaleStatusEnum.PENDING), seller)
 
     # Update
     controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.APROVED)
@@ -123,7 +123,7 @@ def test_update_sale_status_success(session: Session):
 def test_update_sale_status_fail(session: Session):
     # Prepare
     seller = controller.seller.create(session, schema=CreateSellerFactory())
-    sale = controller.sale.create(session, CreateSaleFactory(seller_cpf=seller.cpf, status=SaleStatusEnum.PENDING))
+    sale = controller.sale.create(session, CreateSaleFactory(status=SaleStatusEnum.PENDING), seller)
 
     # Update
     controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.APROVED)

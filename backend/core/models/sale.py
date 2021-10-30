@@ -3,9 +3,10 @@ from typing import Any, Dict, Optional
 from uuid import UUID, uuid4
 
 from pydantic import PositiveFloat, root_validator, validator
-from sqlmodel import Column, Enum, Field, Relationship, SQLModel, extract, select
+from sqlmodel import Column, Enum, Field, Relationship, SQLModel
 from sqlmodel.sql.sqltypes import GUID
 
+from backend.core import controller
 from backend.core.helpers.constants import SalesCashbackRange, SaleStatusEnum
 from backend.core.helpers.database import session_context
 from backend.core.helpers.documents import normalize_cpf
@@ -14,7 +15,6 @@ from .seller import Seller
 
 
 class BaseSale(SQLModel):
-    seller_cpf: str = Field(foreign_key="sellers.cpf")
     value: PositiveFloat
     item_code: str
     date: dt.date
@@ -36,8 +36,11 @@ class GetAllSales(SQLModel):
         return values
 
     @validator("seller_cpf")
-    def normalize_seller_cpf(cls, value: str) -> str:
-        return normalize_cpf(value)
+    def normalize_seller_cpf(cls, value: Optional[str]) -> Optional[str]:
+        if value is not None:
+            return normalize_cpf(value)
+
+        return value
 
 
 class CreateSale(BaseSale):
@@ -57,6 +60,7 @@ class Sale(BaseSale, table=True):
     __tablename__ = "sales"
 
     id: UUID = Field(default_factory=uuid4, sa_column=Column("id", GUID(), primary_key=True))
+    seller_cpf: str = Field(foreign_key="sellers.cpf")
     status: SaleStatusEnum = Field(sa_column=Column(Enum(SaleStatusEnum), nullable=False))
 
     seller: "Seller" = Relationship(back_populates="sales")
@@ -68,16 +72,9 @@ class Sale(BaseSale, table=True):
     @property
     def cashback_percentual(self) -> PositiveFloat:
         with session_context() as session:
-            sales = session.exec(
-                select(Sale)
-                .join(Seller)
-                .where(
-                    Seller.id == self.seller.id,
-                    extract("month", Sale.date) == self.date.month,
-                    extract("year", Sale.date) == self.date.year,
-                )
-            ).all()
-            total_sales = sum(s.value for s in sales)
+            total_sales = controller.sale.get_total_of_sales_by_period(
+                session, self.seller.id, month=self.date.month, year=self.date.year
+            )
 
         return SalesCashbackRange.get_percentual_by_total_value(total_sales)
 

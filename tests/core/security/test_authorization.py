@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 
 from backend.core.helpers.exceptions import NotAuthorizedError
-from backend.core.security.authorization import create_access_token, load_jwt_token
+from backend.core.security.authorization import create_access_token, load_authorization
 
 
 def test_create_access_token_success():
@@ -16,7 +16,7 @@ def test_create_access_token_success():
 
     # Assert
     assert token is not None
-    assert load_jwt_token(token) is not None
+    assert load_authorization(token.access_token) is not None
 
 
 def test_create_access_token_fail():
@@ -27,14 +27,14 @@ def test_create_access_token_fail():
         create_access_token("")
 
 
-def test_load_jwt_token_fail():
+def test_load_authorization_fail():
     with pytest.raises(NotAuthorizedError):
-        load_jwt_token("")
+        load_authorization("")
 
 
-def test_load_jwt_token_expired_fail():
+def test_load_authorization_expired_fail():
     subject = str(uuid4())
     token = create_access_token(subject, timedelta(-1))
 
     with pytest.raises(NotAuthorizedError):
-        load_jwt_token(token)
+        load_authorization(token.access_token)

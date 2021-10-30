@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Union
+from uuid import UUID
 
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError
@@ -8,12 +9,12 @@ from pydantic import ValidationError
 from backend.core.config import settings
 from backend.core.helpers.date import now_datetime
 from backend.core.helpers.exceptions import NotAuthorizedError
-from backend.core.models import Token
+from backend.core.models import Authorization, Token
 
 ALGORITHM = "HS256"
 
 
-def create_access_token(subject: str, expires_delta: Union[int, timedelta] = None) -> str:
+def create_access_token(subject: UUID, expires_delta: Union[int, timedelta] = None) -> Token:
     if not subject:
         raise ValueError("Subject can't be null")
 
@@ -25,16 +26,16 @@ def create_access_token(subject: str, expires_delta: Union[int, timedelta] = Non
 
     expire = now_datetime() + expires_delta
 
-    to_encode = {"exp": expire, "sub": subject}
+    to_encode = {"exp": expire, "sub": str(subject)}
 
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
-    return token
+    return Token(access_token=token, token_type="bearer", expires=expire.timestamp())
 
 
-def load_jwt_token(token: str) -> Token:
+def load_authorization(token: str) -> Authorization:
     try:
-        return Token(**jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM]))
+        return Authorization(**jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM]))
 
     except ExpiredSignatureError:
         raise NotAuthorizedError("Session expired!")
