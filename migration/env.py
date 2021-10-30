@@ -1,8 +1,8 @@
 from logging.config import fileConfig
 
-import sqlmodel
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlmodel import SQLModel
 
 from backend.core.config import settings
 from backend.core.models import *  # noqa
@@ -10,7 +10,7 @@ from backend.core.models import *  # noqa
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DB_URI)
 fileConfig(config.config_file_name)
-target_metadata = sqlmodel.MetaData
+target_metadata = SQLModel.metadata
 
 
 def run_migrations_offline():

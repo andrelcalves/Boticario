@@ -25,13 +25,13 @@ jobs:
         run: poetry install
 
       - name: Run Black
-        run: poetry run black --check src tests migration
+        run: poetry run black --check backend tests migration
 
       - name: Run Isort
-        run: poetry run isort --check src tests migration
+        run: poetry run isort --check backend tests migration
 
       - name: Run Flake8
-        run: poetry run flake8 src tests migration
+        run: poetry run flake8 backend tests migration
 
       - name: Run AutoFlake8
-        run: poetry run autoflake8 --remove-unused-variables --recursive --exclude=__init__.py src tests migration
+        run: poetry run autoflake8 --remove-unused-variables --recursive --exclude=__init__.py backend tests migration

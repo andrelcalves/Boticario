@@ -1,4 +1,5 @@
 from typing import Tuple, Union
+
 from validate_docbr import CPF
 
 _cpf_validator = CPF()

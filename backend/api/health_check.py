@@ -7,4 +7,8 @@ router = APIRouter()
 
 @router.get("/")
 async def check_application_health():
-    return {"status": "OK", "version": settings.VERSION, "environment": settings.ENVIRONMENT}
+    return {
+        "status": "OK",
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
+    }

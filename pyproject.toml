@@ -45,5 +45,6 @@ line-length=120
 
 [tool.pytest.ini_options]
 env = [
-    "ENVIRONMENT = test"
+    "ENVIRONMENT = test",
+    "SQLALCHEMY_DB_URI = postgresql://postgres:secret@localhost:5432/boticario"
     ]

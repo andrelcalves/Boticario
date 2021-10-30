@@ -6,7 +6,7 @@ run:
 	@uvicorn "backend.app:app" --port 5000 --reload
 
 deploy: upgrade
-	@poetry run gunicorn backend.app:app -c "./backend/gunicorn.py"
+	@poetry run gunicorn "backend.app:app" -c "./backend/gunicorn.py"
 
 test:
 	@ENVIRONMENT=test pytest tests
@@ -19,8 +19,8 @@ docker:
 format:
 	@poetry run black backend tests migration
 	@poetry run isort backend tests migration
-	@poetry run flake8 backend tests migration
 	@poetry run autoflake8 --remove-unused-variables --recursive --exclude=__init__.py --in-place backend tests migration
+	@poetry run flake8 backend tests migration
 
 revision:
 	@PYTHONPATH="${PYTHONPATH}" poetry run alembic revision --autogenerate

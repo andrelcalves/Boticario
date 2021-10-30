@@ -14,3 +14,5 @@ ADD pyproject.toml poetry.lock ./
 RUN poetry install --no-root --no-dev --no-interaction --no-ansi
 
 ADD . .
+
+ENTRYPOINT [ "make", "deploy" ]
