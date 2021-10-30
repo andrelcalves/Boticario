@@ -14,15 +14,10 @@ jobs:
     env:
       ENVIRONMENT: test
       SQLALCHEMY_DB_URI: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{secrets.POSTGRES_PORT}}/${{ secrets.POSTGRES_DATABASE }}
-      APPLICATION_NAME: test-store
+      APPLICATION_NAME: test-boticario
       SECRET_KEY: ${{secrets.SECRET_KEY}}
-      FIRST_SUPERUSER_NAME: ${{ secrets.FIRST_SUPERUSER_NAME }}
-      FIRST_SUPERUSER_EMAIL: ${{ secrets.FIRST_SUPERUSER_EMAIL }}
-      FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
-      CACHE_HOST: ${{ secrets.CACHE_HOST }}
-      STORAGE_URL: ${{ secrets.STORAGE_URL }}
-      STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
-      EVENTS_BROKER_URL: ${{ secrets.EVENTS_BROKER_URL }}
+      CPFS_TO_AUTO_APROVE_SALES: ${{secrets.CPFS_TO_AUTO_APROVE_SALES}}
+
       VERSION: 0.0.0
 
     services:
