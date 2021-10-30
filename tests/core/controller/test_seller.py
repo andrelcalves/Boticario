@@ -18,7 +18,6 @@ def test_create_success(session: Session):
     assert seller is not None
     assert seller.name == schema.name
     assert seller.cpf == schema.cpf
-    assert seller.active is True
     assert seller.id is not None
     assert seller.password_hash != schema.password
 
