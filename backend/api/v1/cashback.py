@@ -19,8 +19,13 @@ async def get_total_cashback_by_seller_id(
     cashback_client: CashbackClient = Depends(DefaultCashbackClient),
 ):
     seller = controller.seller.get_by_id(session, seller_id)
-    total_cashback = cashback_client.get_total(seller_id)
+    total_cashback = cashback_client.get_total(seller.cpf)
 
-    data = {"seller_id": seller.id, "seller_name": seller.name, "seller_cpf": seller.cpf, "cashback": total_cashback}
+    data = {
+        "seller_id": seller.id,
+        "seller_name": seller.name,
+        "seller_cpf": seller.cpf,
+        "total_cashback": total_cashback,
+    }
 
     return data

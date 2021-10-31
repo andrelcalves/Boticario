@@ -20,3 +20,11 @@ class NotAuthorizedError(Exception):
     def __init__(self, message: str) -> None:
         self.detail = message
         super().__init__(message)
+
+
+class ServiceError(Exception):
+    detail: str
+
+    def __init__(self, message: str) -> None:
+        self.detail = message
+        super().__init__(message)

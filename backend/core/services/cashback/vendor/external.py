@@ -4,6 +4,7 @@ import requests
 from pydantic import AnyHttpUrl
 
 from backend.core.config import settings
+from backend.core.helpers.exceptions import ServiceError
 
 from .. import CashbackClient
 
@@ -18,8 +19,11 @@ class ExternalCashbackClient(CashbackClient):
             params={"cpf": seller_cpf},
             headers=self.__headers,
         )
-        response.raise_for_status()
+
         data = response.json()
+
+        if data["statusCode"] != 200:
+            raise ServiceError(data.get("message", "Unknow error in Cashback API"))
 
         return data["body"]["credit"]
 
