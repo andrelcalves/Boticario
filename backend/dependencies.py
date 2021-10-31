@@ -27,6 +27,6 @@ async def get_current_seller(
     return seller
 
 
-async def check_authorization(session: Session, auth: str = Depends(get_authorization)) -> None:
-    if not controller.seller.check_exists(session, auth.sub):
+async def check_authorization(session: Session = Depends(make_session), auth: str = Depends(get_authorization)) -> None:
+    if not controller.seller.check_if_exists(session, auth.sub):
         raise NotAuthorizedError("Invalid authentication credentials")

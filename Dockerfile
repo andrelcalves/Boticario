@@ -15,4 +15,6 @@ RUN poetry install --no-root --no-dev --no-interaction --no-ansi
 
 ADD . .
 
+EXPOSE 80
+
 ENTRYPOINT [ "make", "deploy" ]

@@ -19,6 +19,7 @@ async def get_all_sales(
     session: Session = Depends(make_session),
     current_seller: Seller = Depends(get_current_seller),
 ):
+    query.seller_cpf = current_seller.cpf
     return controller.sale.get_all(session, query)
 
 

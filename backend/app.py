@@ -3,9 +3,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import UJSONResponse
 
+from backend.core import controller
+from backend.core.models import CreateSeller
+
 from .api import auth, health_check, v1
 from .core.config import settings
-from .core.helpers.database import init_database
+from .core.helpers.database import session_context
 from .core.helpers.exceptions import DatabaseError, NotAuthorizedError, NotFoundError
 from .core.helpers.logger import logger
 
@@ -60,9 +63,30 @@ async def unknown_error(request: Request, exc: Exception):
 
 @app.on_event("startup")
 async def start_application():
-    logger.info("Starting database..")
-    init_database()
-    logger.info("Database started..")
+    try:
+        with session_context() as session:
+            try:
+                logger.info("Searching for first seller..")
+                controller.seller.get_by_cpf(session, settings.FIRST_SELLER_CPF)
+
+            except NotFoundError:
+                logger.info("Couldn't be found the first seller, starting creation")
+                controller.seller.create(
+                    session,
+                    CreateSeller(
+                        cpf=settings.FIRST_SELLER_CPF,
+                        name=settings.FIRST_SELLER_NAME,
+                        email=settings.FIRST_SELLER_EMAIL,
+                        password=settings.FIRST_SELLER_PASSWORD,
+                        confirm_password=settings.FIRST_SELLER_PASSWORD,
+                    ),
+                )
+
+    except Exception as err:  # In some cases the creation fails because the workers tried to create at the same time
+        logger.error(f"Couldn't create the Fist Seller: {err}")
+
+    else:
+        logger.info("Firt seller created with success!")
 
 
 if __name__ == "__main__":

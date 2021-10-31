@@ -13,9 +13,9 @@ if TYPE_CHECKING:
 
 
 class BaseSeller(SQLModel):
-    cpf: str = Field(sa_column_kwargs={"unique": True})
-    name: str
-    email: EmailStr
+    cpf: str = Field(..., description="CPF of the Seller", sa_column_kwargs={"unique": True})
+    name: str = Field(..., description="Name of the Seller")
+    email: EmailStr = Field(..., description="Email of the Seller")
 
     @validator("name")
     def validate_name(cls, value: str) -> str:
@@ -38,8 +38,8 @@ class BaseSeller(SQLModel):
 
 
 class CreateSeller(BaseSeller):
-    password: str
-    confirm_password: str
+    password: str = Field(..., description="Password")
+    confirm_password: str = Field(..., description="Confirmation of the password")
 
     @validator("confirm_password")
     def check_password(cls, value: str, values: Dict[str, Any]) -> str:
@@ -52,13 +52,15 @@ class CreateSeller(BaseSeller):
 class Seller(BaseSeller, table=True):
     __tablename__ = "sellers"
 
-    id: UUID = Field(default_factory=uuid4, sa_column=Column("id", GUID(), primary_key=True))
-    password_hash: str
+    id: UUID = Field(
+        default_factory=uuid4, description="ID of the Seller", sa_column=Column("id", GUID(), primary_key=True)
+    )
+    password_hash: str = Field(..., description="Hash of Seller password")
 
     sales: List["Sale"] = Relationship(back_populates="seller")
 
 
 class SellerResponse(BaseSeller):
-    id: UUID
+    id: UUID = Field(..., description="ID of the Seller")
 
     sales: List["SaleResponse"]

@@ -1,7 +1,7 @@
 from typing import List
 
 from pydantic import BaseSettings, PositiveInt, validator
-from pydantic.networks import EmailStr, PostgresDsn
+from pydantic.networks import AnyHttpUrl, EmailStr, PostgresDsn
 
 from .helpers.constants import EnvironmentEnum
 from .helpers.documents import normalize_cpf
@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     FIRST_SELLER_PASSWORD: str
     FIRST_SELLER_EMAIL: EmailStr
 
+    @validator("FIRST_SELLER_CPF")
+    def normalize_first_seller_cpf(cls, value: str) -> str:
+        return normalize_cpf(value)
+
     # Security
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
@@ -35,6 +39,10 @@ class Settings(BaseSettings):
     # Options
     DEFAULT_TIMEZONE: str = "America/Sao_Paulo"
     CPFS_TO_AUTO_APROVE_SALES: List[str] = '["153.509.460-56"]'
+
+    # Services
+    CASHBACK_API_URL: AnyHttpUrl
+    CASHBACK_API_TOKEN: str
 
     @validator("CPFS_TO_AUTO_APROVE_SALES", pre=True)
     def normalize_cpfs_to_auto_aprove_sales(cls, value: str) -> List[str]:

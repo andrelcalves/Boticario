@@ -3,10 +3,9 @@ from typing import Any, Dict, Optional
 from uuid import UUID, uuid4
 
 from pydantic import PositiveFloat, root_validator, validator
-from sqlmodel import Column, Enum, Field, Relationship, SQLModel
+from sqlmodel import Column, Enum, Field, Relationship, SQLModel, extract, select
 from sqlmodel.sql.sqltypes import GUID
 
-from backend.core import controller
 from backend.core.helpers.constants import SalesCashbackRange, SaleStatusEnum
 from backend.core.helpers.database import session_context
 from backend.core.helpers.documents import normalize_cpf
@@ -15,15 +14,15 @@ from .seller import Seller
 
 
 class BaseSale(SQLModel):
-    value: PositiveFloat
-    item_code: str
-    date: dt.date
+    value: PositiveFloat = Field(..., description="Value of the sale")
+    item_code: str = Field(..., description="Code of the item")
+    date: dt.date = Field(..., description="Date of the sale")
 
 
 class GetAllSales(SQLModel):
-    seller_cpf: Optional[str]
-    month: Optional[int]
-    year: Optional[int]
+    seller_cpf: Optional[str] = Field(..., description="CPF of the Seller who made the purchase")
+    month: Optional[int] = Field(..., description="Month of the sale for the query *required if year is informed")
+    year: Optional[int] = Field(..., description="Year of the sale for the query *required if month is informed")
 
     @root_validator()
     def validate_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -44,24 +43,28 @@ class GetAllSales(SQLModel):
 
 
 class CreateSale(BaseSale):
-    status: SaleStatusEnum = Field(default=SaleStatusEnum.PENDING)
+    pass
 
 
 class UpdateSale(SQLModel):
-    id: UUID
-    status: Optional[SaleStatusEnum]
-    seller_cpf: Optional[str]
-    value: Optional[float]
-    item_code: Optional[str]
-    date: Optional[dt.date]
+    id: UUID = Field(..., description="ID of the purchase")
+    status: SaleStatusEnum = Field(
+        description="New status of the purchase, it is only possible to change if status is pending"
+    )
 
 
 class Sale(BaseSale, table=True):
     __tablename__ = "sales"
 
-    id: UUID = Field(default_factory=uuid4, sa_column=Column("id", GUID(), primary_key=True))
-    seller_cpf: str = Field(foreign_key="sellers.cpf")
-    status: SaleStatusEnum = Field(sa_column=Column(Enum(SaleStatusEnum), nullable=False))
+    id: UUID = Field(
+        default_factory=uuid4, description="ID of the purchase", sa_column=Column("id", GUID(), primary_key=True)
+    )
+    seller_cpf: str = Field(description="CPF of the Seller who made the purchase", foreign_key="sellers.cpf")
+    status: SaleStatusEnum = Field(
+        default=SaleStatusEnum.PENDING,
+        description="Current Status of the purchase",
+        sa_column=Column(Enum(SaleStatusEnum), nullable=False),
+    )
 
     seller: "Seller" = Relationship(back_populates="sales")
 
@@ -72,15 +75,23 @@ class Sale(BaseSale, table=True):
     @property
     def cashback_percentual(self) -> PositiveFloat:
         with session_context() as session:
-            total_sales = controller.sale.get_total_of_sales_by_period(
-                session, self.seller.id, month=self.date.month, year=self.date.year
-            )
+            sales = session.exec(
+                select(Sale)
+                .join(Seller)
+                .where(
+                    Seller.id == self.seller.id,
+                    extract("month", Sale.date) == self.date.month,
+                    extract("year", Sale.date) == self.date.year,
+                )
+            ).all()
+
+            total_sales = sum(s.value for s in sales)
 
         return SalesCashbackRange.get_percentual_by_total_value(total_sales)
 
 
 class SaleResponse(BaseSale):
-    id: UUID
-    status: SaleStatusEnum
-    cashback_value: PositiveFloat
-    cashback_percentual: PositiveFloat
+    id: UUID = Field(..., description="ID of the purchase", sa_column=Column("id", GUID(), primary_key=True))
+    status: SaleStatusEnum = Field(..., description="Current Status of the purchase")
+    cashback_value: PositiveFloat = Field(..., description="Value of the cashback for the sale")
+    cashback_percentual: PositiveFloat = Field(..., description="Percentual of the cashback for the sale")
