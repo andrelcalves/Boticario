@@ -26,6 +26,13 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DATABASE }}
+          FIRST_SELLER_CPF: ${{ secrets.FIRST_SELLER_CPF }}
+          FIRST_SELLER_NAME: ${{ secrets.FIRST_SELLER_NAME }}
+          FIRST_SELLER_EMAIL: ${{ secrets.FIRST_SELLER_EMAIL }}
+          FIRST_SELLER_PASSWORD: ${{ secrets.FIRST_SELLER_PASSWORD }}
+          CASHBACK_API_URL: ${{ secrets.CASHBACK_API_URL }}
+          CASHBACK_API_TOKEN: ${{ secrets.CASHBACK_API_TOKEN }}
+
         ports:
           - 5432:5432
         options: >-
