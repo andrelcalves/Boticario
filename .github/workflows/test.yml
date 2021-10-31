@@ -16,7 +16,6 @@ jobs:
       SQLALCHEMY_DB_URI: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{secrets.POSTGRES_PORT}}/${{ secrets.POSTGRES_DATABASE }}
       APPLICATION_NAME: test-boticario
       SECRET_KEY: ${{secrets.SECRET_KEY}}
-      CPFS_TO_AUTO_APROVE_SALES: ${{secrets.CPFS_TO_AUTO_APROVE_SALES}}
 
       VERSION: 0.0.0
 
