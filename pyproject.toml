@@ -47,5 +47,11 @@ line-length=120
 [tool.pytest.ini_options]
 env = [
     "ENVIRONMENT = test",
-    "SQLALCHEMY_DB_URI = postgresql://postgres:secret@localhost:5432/test_boticario"
+    "SQLALCHEMY_DB_URI = postgresql://postgres:secret@localhost:5432/test_boticario",
+    "FIRST_SELLER_CPF = 15350946056",
+    "FIRST_SELLER_PASSWORD = iamsecret",
+    "FIRST_SELLER_EMAIL = email@example.com",
+    "FIRST_SELLER_NAME = Name Lastname",
+    "CASHBACK_API_URL = https://mdaqk8ek5j.execute-api.us-east-1.amazonaws.com",
+    "CASHBACK_API_TOKEN = token",
     ]

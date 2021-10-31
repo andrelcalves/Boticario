@@ -8,7 +8,7 @@ from backend.core.models import CreateSeller, Seller
 from backend.core.security.hash import get_password_hash
 
 
-def get_by_cpf(session: Session, seller_cpf: str) -> "Seller":
+def get_by_cpf(session: Session, seller_cpf: str) -> Seller:
     cpf = normalize_cpf(seller_cpf)
     seller = session.exec(select(Seller).where(Seller.cpf == cpf)).first()
 
@@ -18,7 +18,7 @@ def get_by_cpf(session: Session, seller_cpf: str) -> "Seller":
     return seller
 
 
-def get_by_id(session: Session, seller_id: UUID) -> "Seller":
+def get_by_id(session: Session, seller_id: UUID) -> Seller:
     seller = session.exec(select(Seller).where(Seller.id == seller_id)).first()
 
     if not seller:
@@ -27,7 +27,7 @@ def get_by_id(session: Session, seller_id: UUID) -> "Seller":
     return seller
 
 
-def create(session: Session, schema: "CreateSeller") -> "Seller":
+def create(session: Session, schema: CreateSeller) -> Seller:
     if session.exec(select(Seller).where(Seller.cpf == schema.cpf)).first():
         raise DatabaseError(f'Alread exists Seller with CPF "{schema.cpf}"')
 
