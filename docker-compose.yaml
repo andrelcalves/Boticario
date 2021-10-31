@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  database:
+    image: postgres
+    container_name: database
+
+    environment:
+      POSTGRES_PASSWORD: secret
+      TZ: 'GMT-3'
+      PGTZ: 'GMT-3'
+
+    ports:
+      - 5432:5432
+
+    volumes:
+      - .data/db:/var/lib/postgresql/data
+
+    networks:
+      - boticario-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: backend
+    env_file: .env.docker
+
+    networks:
+     - boticario-network
+
+    ports:
+      - 5000:80
+
+    depends_on:
+      - database
+
+networks:
+  boticario-network:
+    driver: bridge
