@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 from backend.core import controller
 from backend.core.helpers.constants import SalesCashbackRange, SaleStatusEnum
-from backend.core.helpers.exceptions import DatabaseError, NotFoundError
+from backend.core.helpers.exceptions import DatabaseError, NotAuthorizedError, NotFoundError
 from backend.core.models import GetAllSales, Seller
 from tests.factories.sale import CreateSaleFactory
 from tests.factories.seller import CreateSellerFactory
@@ -70,10 +70,11 @@ def test_get_all_success(session: Session):
 def test_delete_success(session: Session):
     # Prepare
     seller = controller.seller.create(session, schema=CreateSellerFactory())
+
     sale = controller.sale.create(session, CreateSaleFactory(), seller)
 
     # Delete
-    deleted_sale = controller.sale.delete_by_id(session, sale.id)
+    deleted_sale = controller.sale.delete_by_id(session, sale.id, seller)
 
     # Assert
     assert deleted_sale is not None
@@ -85,8 +86,18 @@ def test_delete_success(session: Session):
 
 
 def test_delete_fail(session: Session):
+    # Prepare
+    seller = controller.seller.create(session, schema=CreateSellerFactory())
+    seller2 = controller.seller.create(session, schema=CreateSellerFactory())
+
+    sale = controller.sale.create(session, CreateSaleFactory(), seller)
+
+    # Delete
+    with pytest.raises(NotAuthorizedError):
+        controller.sale.delete_by_id(session, sale.id, seller2)
+
     with pytest.raises(NotFoundError):
-        controller.sale.get_by_id(session, uuid4())
+        controller.sale.delete_by_id(session, uuid4(), seller)
 
 
 def test_sale_cashback(session: Session):
@@ -112,8 +123,8 @@ def test_update_sale_status_success(session: Session):
     sale2 = controller.sale.create(session, CreateSaleFactory(status=SaleStatusEnum.PENDING), seller)
 
     # Update
-    controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.APROVED)
-    controller.sale.update_sale_status_by_id(session, sale2.id, status=SaleStatusEnum.REFUSED)
+    controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.APROVED, current_seller=seller)
+    controller.sale.update_sale_status_by_id(session, sale2.id, status=SaleStatusEnum.REFUSED, current_seller=seller)
 
     # Assert
     assert sale.status == SaleStatusEnum.APROVED
@@ -123,14 +134,26 @@ def test_update_sale_status_success(session: Session):
 def test_update_sale_status_fail(session: Session):
     # Prepare
     seller = controller.seller.create(session, schema=CreateSellerFactory())
+    seller2 = controller.seller.create(session, schema=CreateSellerFactory())
     sale = controller.sale.create(session, CreateSaleFactory(status=SaleStatusEnum.PENDING), seller)
+    sale2 = controller.sale.create(session, CreateSaleFactory(status=SaleStatusEnum.PENDING), seller)
 
     # Update
-    controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.APROVED)
+    controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.APROVED, current_seller=seller)
 
     # Assert
     with pytest.raises(DatabaseError):
-        controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.PENDING)
+        controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.PENDING, current_seller=seller)
 
     with pytest.raises(DatabaseError):
-        controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.REFUSED)
+        controller.sale.update_sale_status_by_id(session, sale.id, status=SaleStatusEnum.REFUSED, current_seller=seller)
+
+    with pytest.raises(NotAuthorizedError):
+        controller.sale.update_sale_status_by_id(
+            session, sale2.id, status=SaleStatusEnum.APROVED, current_seller=seller2
+        )
+
+    with pytest.raises(NotAuthorizedError):
+        controller.sale.update_sale_status_by_id(
+            session, sale2.id, status=SaleStatusEnum.REFUSED, current_seller=seller2
+        )

@@ -34,13 +34,11 @@ async def create_sale(
 async def update_sale(
     schema: UpdateSale, session: Session = Depends(make_session), current_seller: Seller = Depends(get_current_seller)
 ):
-    return controller.sale.update_sale_status_by_id(session, schema.id, schema.status)
+    return controller.sale.update_sale_status_by_id(session, schema.id, schema.status, current_seller)
 
 
 @router.get("/{sale_id}", response_model=Sale)
-async def get_sale(
-    sale_id: UUID, session: Session = Depends(make_session), current_seller: Seller = Depends(get_current_seller)
-):
+async def get_sale(sale_id: UUID, session: Session = Depends(make_session)):
     return controller.sale.get_by_id(session, sale_id)
 
 
@@ -48,4 +46,4 @@ async def get_sale(
 async def delete_sale(
     sale_id: UUID, session: Session = Depends(make_session), current_seller: Seller = Depends(get_current_seller)
 ):
-    return controller.sale.delete_by_id(session, sale_id)
+    return controller.sale.delete_by_id(session, sale_id, current_seller)

@@ -13,9 +13,15 @@ jobs:
 
     env:
       ENVIRONMENT: test
-      SQLALCHEMY_DB_URI: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{secrets.POSTGRES_PORT}}/${{ secrets.POSTGRES_DATABASE }}
       APPLICATION_NAME: test-boticario
       SECRET_KEY: ${{secrets.SECRET_KEY}}
+      CASHBACK_API_URL: ${{ secrets.CASHBACK_API_URL }}
+      CASHBACK_API_TOKEN: ${{ secrets.CASHBACK_API_TOKEN }}
+      FIRST_SELLER_CPF: ${{ secrets.FIRST_SELLER_CPF }}
+      FIRST_SELLER_NAME: ${{ secrets.FIRST_SELLER_NAME }}
+      FIRST_SELLER_EMAIL: ${{ secrets.FIRST_SELLER_EMAIL }}
+      FIRST_SELLER_PASSWORD: ${{ secrets.FIRST_SELLER_PASSWORD }}
+      SQLALCHEMY_DB_URI: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{secrets.POSTGRES_PORT}}/${{ secrets.POSTGRES_DATABASE }}
 
       VERSION: 0.0.0
 
@@ -54,12 +60,4 @@ jobs:
         run: make upgrade
 
       - name: Run Tests
-        run: poetry run pytest
-        env:
-          ENVIRONMENT: test
-          FIRST_SELLER_CPF: ${{ secrets.FIRST_SELLER_CPF }}
-          FIRST_SELLER_NAME: ${{ secrets.FIRST_SELLER_NAME }}
-          FIRST_SELLER_EMAIL: ${{ secrets.FIRST_SELLER_EMAIL }}
-          FIRST_SELLER_PASSWORD: ${{ secrets.FIRST_SELLER_PASSWORD }}
-          CASHBACK_API_URL: ${{ secrets.CASHBACK_API_URL }}
-          CASHBACK_API_TOKEN: ${{ secrets.CASHBACK_API_TOKEN }}
+        run: make test

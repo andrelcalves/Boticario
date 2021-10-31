@@ -3,13 +3,13 @@
 PYTHONPATH = $(shell pwd)
 
 run:
-	@uvicorn "backend.app:app" --port 5000 --reload
+	@poetry run uvicorn "backend.app:app" --port 5000 --reload
 
 deploy: upgrade
 	@poetry run gunicorn "backend.app:app" -c "./backend/gunicorn.py"
 
 test:
-	@ENVIRONMENT=test pytest tests
+	@ENVIRONMENT=test poetry run pytest
 
 docker:
 	@docker rm -f backend || true
@@ -27,7 +27,7 @@ format:
 	@poetry run flake8 backend tests migration
 
 coverage:
-	@poetry run coverage run -m pytest
+	@ENVIRONMENT=test poetry run coverage run -m pytest
 	@poetry run coverage report -m
 	@poetry run coverage html
 
