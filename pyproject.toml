@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "backend"
 version = "0.1.0"
-description = "Backend para o controle de vendas do processo seletivo para o Grupo Boticário"
+description = "Backend para o processo seletivo do Grupo Boticário"
 authors = ["Ueslei Carvalho <uesleicdoliveira@gmail.com>"]
 
 [tool.poetry.dependencies]
@@ -30,7 +30,6 @@ isort = "^5.9.3"
 autoflake8 = "^0.2.2"
 factory-boy = "^3.2.1"
 pre-commit = "^2.15.0"
-pytest-env = "^0.6.2"
 coverage = "^6.1.1"
 
 [build-system]
