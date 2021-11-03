@@ -20,4 +20,4 @@ class SalesCashbackRange:
     @classmethod
     def get_percentual_by_total_value(cls, total: float) -> float:
         sorted_values = sorted(cls.PERCENTUAL_BY_VALUE.items(), key=lambda x: x[0], reverse=True)
-        return next((p for v, p in sorted_values if total > v))
+        return next((p for v, p in sorted_values if total >= v))

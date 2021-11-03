@@ -19,6 +19,30 @@ def test_create_access_token_success():
     assert load_authorization(token.access_token) is not None
 
 
+def test_create_access_token_with_int_expiredelta_success():
+    # Prepare
+    subject = str(uuid4())
+
+    # Create
+    token = create_access_token(subject, expires_delta=timedelta(minutes=10))
+
+    # Assert
+    assert token is not None
+    assert load_authorization(token.access_token) is not None
+
+
+def test_create_access_token_with_timedelta_expiredelta_success():
+    # Prepare
+    subject = str(uuid4())
+
+    # Create
+    token = create_access_token(subject, expires_delta=600)
+
+    # Assert
+    assert token is not None
+    assert load_authorization(token.access_token) is not None
+
+
 def test_create_access_token_fail():
     with pytest.raises(ValueError):
         create_access_token(None)

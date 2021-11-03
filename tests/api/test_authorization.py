@@ -33,3 +33,19 @@ def test_get_access_token_fail(client: TestClient, session: Session):
     # Assert
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert data.get("access_token") is None
+
+
+def test_get_access_token_with_invalid_cpf_fail(client: TestClient, session: Session):
+    # Prepare
+    schema = CreateSellerFactory()
+    schema2 = CreateSellerFactory()
+    controller.seller.create(session, schema)
+
+    # Request
+
+    response = client.post("/auth/token", data={"username": schema2.cpf, "password": schema.password})
+    data = response.json()
+
+    # Assert
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert data.get("access_token") is None

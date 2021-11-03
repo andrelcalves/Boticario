@@ -10,6 +10,9 @@ def normalize_cpf(cpf: str) -> str:
 
 
 def normalize_and_validate_cpf(cpf: str) -> Tuple[bool, Union[str, None]]:
-    normalized_cpf = normalize_cpf(cpf)
+    cpf_is_valid = _cpf_validator.validate(cpf)
 
-    return _cpf_validator.validate(normalized_cpf), normalized_cpf
+    if not cpf_is_valid:
+        return cpf_is_valid, None
+
+    return cpf_is_valid, normalize_cpf(cpf)

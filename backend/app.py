@@ -9,7 +9,7 @@ from backend.core.models import CreateSeller
 from .api import auth, health_check, v1
 from .core.config import settings
 from .core.helpers.database import session_context
-from .core.helpers.exceptions import DatabaseError, NotAuthorizedError, NotFoundError
+from .core.helpers.exceptions import DatabaseError, NotAuthorizedError, NotFoundError, ServiceError
 from .core.helpers.logger import logger
 
 app = FastAPI(
@@ -59,6 +59,14 @@ async def not_authorized_error(request: Request, exc: NotAuthorizedError):
 @app.exception_handler(Exception)
 async def unknown_error(request: Request, exc: Exception):
     return UJSONResponse(content={"message": str(exc)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@app.exception_handler(Exception)
+async def service_error(request: Request, exc: ServiceError):
+    return UJSONResponse(
+        content={"message": f"Error on service {exc.service}, {exc.detail}"},
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
 
 
 @app.on_event("startup")

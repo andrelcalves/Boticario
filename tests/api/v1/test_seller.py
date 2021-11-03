@@ -4,9 +4,6 @@ from fastapi.testclient import TestClient
 from backend.core.models import Seller
 from tests.factories.seller import CreateSellerFactory
 
-# Em uma aplicação real, todos os testes seriam implementados
-# implementei apenas o 1 caso para demonstrar como realizo os testes de ingração
-
 
 def test_create_seller_success(client: TestClient, access_token: str):
     # Prepare

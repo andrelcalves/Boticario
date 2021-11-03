@@ -7,5 +7,6 @@ class NoneCashbackClient(CashbackClient):
     conforme o design pattern: https://sourcemaking.com/design_patterns/null_object
     """
 
-    def get_total(self, seller_cpf: str) -> float:
-        return 0
+    @classmethod
+    def get_total(cls, seller_cpf: str) -> float:
+        return 1

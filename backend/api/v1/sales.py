@@ -6,21 +6,28 @@ from fastapi.param_functions import Depends
 
 from backend.core import controller
 from backend.core.helpers.database import Session, make_session
-from backend.core.models import CreateSale, GetAllSales, Sale, SaleResponse, Seller
+from backend.core.models import CreateSale, GetAllSales, Sale, SaleWithCashback, Seller
 from backend.core.models.sale import UpdateSale
 from backend.dependencies import get_current_seller
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[SaleResponse])
+@router.get("/", response_model=List[SaleWithCashback])
 async def get_all_sales(
     query: GetAllSales = Depends(),
     session: Session = Depends(make_session),
     current_seller: Seller = Depends(get_current_seller),
 ):
+    response = []
     query.seller_cpf = current_seller.cpf
-    return controller.sale.get_all(session, query)
+    sales = controller.sale.get_all(session, query)
+
+    for sale in sales:
+        cashback = controller.cashback.get_sale_cashback(session, sale)
+        response.append({**sale.dict(), **cashback.dict()})
+
+    return response
 
 
 @router.post("/", response_model=Sale, status_code=status.HTTP_201_CREATED)
