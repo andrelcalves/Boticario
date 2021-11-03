@@ -8,9 +8,6 @@ from backend.core.helpers.constants import SaleStatusEnum
 from backend.core.models import Sale, SaleWithCashback
 from tests.factories.sale import CreateSaleFactory
 
-# Em uma aplicação real, todos os testes seriam implementados
-# implementei apenas o 1 caso para demonstrar como realizo os testes de ingração
-
 
 def test_create_sale_success(client: TestClient, access_token: str):
     # Prepare
