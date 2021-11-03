@@ -1,4 +1,5 @@
 from typing import Generator
+from uuid import uuid4
 
 import pytest
 from _pytest.config import Config
@@ -7,8 +8,7 @@ from sqlmodel import Session, SQLModel
 
 from backend.app import app
 from backend.core import controller
-from backend.core.config import ENVIRONMENT, settings
-from backend.core.helpers.constants import EnvironmentEnum
+from backend.core.config import settings
 from backend.core.helpers.database import engine, make_session
 from backend.core.helpers.documents import normalize_cpf
 from backend.core.helpers.exceptions import NotFoundError
@@ -18,9 +18,6 @@ from tests.factories.seller import CreateSellerFactory
 
 
 def pytest_configure(config: Config):
-    if ENVIRONMENT != EnvironmentEnum.testing:
-        raise RuntimeError(f"You should run tests only in test environment! Current environment: {ENVIRONMENT.name}")
-
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
@@ -52,9 +49,16 @@ def client() -> TestClient:
         yield test_client
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def access_token(session: Session) -> str:
     seller = controller.seller.get_by_cpf(session, settings.FIRST_SELLER_CPF)
-    token = create_access_token(str(seller.id))
+    token = create_access_token(seller.id)
+
+    yield token.access_token
+
+
+@pytest.fixture(scope="session")
+def invalid_access_token():
+    token = create_access_token(uuid4())
 
     yield token.access_token

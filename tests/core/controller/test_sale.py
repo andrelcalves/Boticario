@@ -91,6 +91,8 @@ def test_delete_fail(session: Session):
     seller2 = controller.seller.create(session, schema=CreateSellerFactory())
 
     sale = controller.sale.create(session, CreateSaleFactory(), seller)
+    aproved_sale = controller.sale.create(session, CreateSaleFactory(), seller)
+    controller.sale.update_sale_status_by_id(session, aproved_sale.id, SaleStatusEnum.APROVED, seller)
 
     # Delete
     with pytest.raises(NotAuthorizedError):
@@ -98,6 +100,9 @@ def test_delete_fail(session: Session):
 
     with pytest.raises(NotFoundError):
         controller.sale.delete_by_id(session, uuid4(), seller)
+
+    with pytest.raises(DatabaseError):
+        controller.sale.delete_by_id(session, aproved_sale.id, seller)
 
 
 def test_sale_cashback(session: Session):

@@ -20,9 +20,11 @@ class BaseSale(SQLModel):
 
 
 class GetAllSales(SQLModel):
-    seller_cpf: Optional[str] = Field(..., description="CPF of the Seller who made the purchase")
-    month: Optional[int] = Field(..., description="Month of the sale for the query *required if year is informed")
-    year: Optional[int] = Field(..., description="Year of the sale for the query *required if month is informed")
+    seller_cpf: Optional[str] = Field(description="CPF of the Seller who made the purchase")
+    month: Optional[int] = Field(
+        description="Month of the sale for the query *required if year is informed", ge=1, le=12
+    )
+    year: Optional[int] = Field(description="Year of the sale for the query *required if month is informed")
 
     @root_validator()
     def validate_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -43,7 +45,7 @@ class GetAllSales(SQLModel):
 
 
 class CreateSale(BaseSale):
-    pass
+    item_code: str = Field(..., description="Code of the item", min_length=1)
 
 
 class UpdateSale(SQLModel):
@@ -90,7 +92,7 @@ class Sale(BaseSale, table=True):
         return SalesCashbackRange.get_percentual_by_total_value(total_sales)
 
 
-class SaleResponse(BaseSale):
+class SaleWithCashback(BaseSale):
     id: UUID = Field(..., description="ID of the purchase", sa_column=Column("id", GUID(), primary_key=True))
     status: SaleStatusEnum = Field(..., description="Current Status of the purchase")
     cashback_value: PositiveFloat = Field(..., description="Value of the cashback for the sale")

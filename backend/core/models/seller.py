@@ -9,7 +9,7 @@ from sqlmodel.sql.sqltypes import GUID
 from backend.core.helpers.documents import normalize_and_validate_cpf
 
 if TYPE_CHECKING:
-    from .sale import Sale, SaleResponse
+    from .sale import Sale, SaleWithCashback
 
 
 class BaseSeller(SQLModel):
@@ -60,7 +60,7 @@ class Seller(BaseSeller, table=True):
     sales: List["Sale"] = Relationship(back_populates="seller")
 
 
-class SellerResponse(BaseSeller):
+class SellerWithSaleCashback(BaseSeller):
     id: UUID = Field(..., description="ID of the Seller")
 
-    sales: List["SaleResponse"]
+    sales: List["SaleWithCashback"]

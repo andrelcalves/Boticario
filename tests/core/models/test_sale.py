@@ -2,13 +2,12 @@ from datetime import date
 
 import pytest
 from pydantic import ValidationError
-from sqlmodel import Session
 
 from backend.core.models import GetAllSales
 from tests.factories.sale import CreateSaleFactory
 
 
-def test_get_all_schema_fail(session: Session):
+def test_get_all_schema_fail():
     today = date.today()
 
     with pytest.raises(ValidationError):
@@ -20,10 +19,8 @@ def test_get_all_schema_fail(session: Session):
     with pytest.raises(ValidationError):
         GetAllSales(month=None, year=today.year)
 
-
-def test_create_sale_with_invalid_cpf_fail():
     with pytest.raises(ValidationError):
-        CreateSaleFactory(seller_cpf=None)
+        GetAllSales(month=today.month, year=None)
 
 
 def test_create_sale_with_invalid_value_fail():

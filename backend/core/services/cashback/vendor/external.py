@@ -13,20 +13,20 @@ class ExternalCashbackClient(CashbackClient):
     base_url: AnyHttpUrl = settings.CASHBACK_API_URL
     api_token: str = settings.CASHBACK_API_TOKEN
 
-    def get_total(self, seller_cpf: str) -> float:
+    @classmethod
+    def get_total(cls, seller_cpf: str) -> float:
         response = requests.get(
-            f"{self.base_url}/v1/cashback",
+            f"{cls.base_url}/v1/cashback",
             params={"cpf": seller_cpf},
-            headers=self.__headers,
+            headers=cls._get_headers(),
         )
 
         data = response.json()
 
         if data["statusCode"] != 200:
-            raise ServiceError(data.get("message", "Unknow error in Cashback API"))
+            raise ServiceError("external-cashback-client", data.get("message", "Unknow error in Cashback API"))
 
         return data["body"]["credit"]
 
-    @property
-    def __headers(self) -> Dict[str, str]:
-        return {"token": self.api_token}
+    def _get_headers(cls) -> Dict[str, str]:
+        return {"token": cls.api_token}
